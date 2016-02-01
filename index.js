@@ -1,8 +1,5 @@
-var Rx = require('rx');
-// TODO don't use local version
-var RxNode = require('../rx-node-extras/index.js');
-
 var hyperquest = require('hyperquest');
+var RxNode = require('rx-node-extra');
 
 function rxQuestGet(uri, opts) {
   opts = opts || {};
