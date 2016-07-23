@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/ariutta/superagent-get-chunked#readme",
   "dependencies": {
-    "chunked-request": "^0.4.0",
+    "chunked-request": "ariutta/chunked-request#30bd49c6c2435255697240f9028438a5b5808cf0",
     "component-emitter": "^1.2.1",
     "superagent": "^2.1.0"
   },
