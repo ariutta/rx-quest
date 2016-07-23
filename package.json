@@ -1,29 +1,34 @@
 {
-  "name": "rx-quest",
+  "name": "superagent-get-chunked",
   "version": "1.0.0-alpha.0",
-  "description": "RxJS wrapper for the hyperquest library.",
+  "description": "Adds support to the superagent library for chunked-transfer encoded responses when in the browser.",
   "main": "index.js",
   "scripts": {
+    "build": "browserify -t uglifyify index.js -o ./test/browser/superagent-get-chunked.js && echo 'onmessage = function(e) {' > ./test/browser/superagent-get-chunked-worker.js && browserify -t uglifyify superagent-get-chunked.js >> ./test/browser/superagent-get-chunked-worker.js && echo '};' >> ./test/browser/superagent-get-chunked-worker.js && uglifyjs ./test/browser/superagent-get-chunked-worker.js -c -o ./test/browser/superagent-get-chunked-worker.min.js",
+    "start": "echo 'Once build finishes, visit http://localhost:8080' && npm run build && cd ./test/browser && http-server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/ariutta/rx-quest.git"
+    "url": "git+ssh://git@github.com/ariutta/superagent-get-chunked.git"
   },
   "keywords": [
     "request",
-    "hyperquest",
-    "rxjs",
-    "rx"
+    "superagent"
   ],
   "author": "Anders Riutta",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ariutta/rx-quest/issues"
+    "url": "https://github.com/ariutta/superagent-get-chunked/issues"
   },
-  "homepage": "https://github.com/ariutta/rx-quest#readme",
+  "homepage": "https://github.com/ariutta/superagent-get-chunked#readme",
   "dependencies": {
-    "hyperquest": "^1.2.0",
-    "rx-node-extra": "https://github.com/ariutta/rx-node-extra.git"
+    "superagent": "^2.1.0"
+  },
+  "devDependencies": {
+    "browserify": "^13.0.1",
+    "http-server": "^0.9.0",
+    "uglify-js": "^2.7.0",
+    "uglifyify": "^3.0.2"
   }
 }

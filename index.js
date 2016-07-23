@@ -1,23 +1,26 @@
-var hyperquest = require('hyperquest');
-var RxNode = require('rx-node-extra');
-
-function rxQuestGet(uri, opts) {
-  opts = opts || {};
-  if (typeof uri === 'string') {
-    opts.uri = uri;
-  } else {
-    opts = uri;
-  }
-  var stream = hyperquest(opts);
-  return RxNode.fromUnpauseableStream(stream);
+var superagent = window.superagent || {};
+if (!window.superagent) {
+  window.superagent = superagent;
 }
 
-function rxQuest(uri, opts) {
-  return rxQuestGet(uri, opts);
-}
+superagent.getChunked = function(input, next, error, complete) {
+  var requestWorker = new Worker('superagent-get-chunked-worker.min.js');
+  requestWorker.onmessage = function(oEvent) {
+    var data = oEvent.data;
+    var type = data.type;
+    var body = data.body;
+    if (type === 'next') {
+      next(body);
+    } else if (type === 'complete') {
+      complete();
+    }
+  };
 
-rxQuest.get = function rxQuest(uri, opts) {
-  return rxQuestGet(uri, opts);
+  requestWorker.onerror = error;
+
+  requestWorker.postMessage({
+    input: input
+  });
 };
 
-module.exports = rxQuest;
+module.exports = superagent;
