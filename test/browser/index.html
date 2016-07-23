@@ -2,20 +2,6 @@
 <html>
 
   <head>
-    <script src="superagent-get-chunked.js"></script>
-    <script>
-      //var url = 'http://webservice.bridgedb.org/Human/xrefs/L/4292';
-      var url = 'https://cdn.rawgit.com/nrnb/mirna-pathway-finder/master/wp-mir-table-builder/mir-gene-targets.txt';
-      superagent.getChunked(url, function(data) {
-        console.log('data');
-        console.log('length: ' + data.length.toString());
-        console.log(data);
-      }, function(err) {
-        throw err;
-      }, function() {
-        console.log('completed');
-      });
-    </script>
 
   </head>
 
@@ -23,6 +9,32 @@
     <h1>Hello World!</h1>
 
     <p>Look at the console.</p>
+    <p id="display-running-content">Waiting...</p>
+
+    <script src="superagent-get-chunked.js"></script>
+    <script>
+      //var url = 'http://webservice.bridgedb.org/Human/xrefs/L/4292';
+      var url = 'https://cdn.rawgit.com/nrnb/mirna-pathway-finder/master/wp-mir-table-builder/mir-gene-targets.txt';
+      var contentP = document.querySelector('#display-running-content');
+      var runningContent = '';
+      request.get(url)
+      .on('data', function(data) {
+        console.log('data');
+        console.log('length: ' + data.length.toString());
+        console.log(data);
+        runningContent += JSON.stringify(data, null, '  ');
+        window.requestAnimationFrame(function() {
+          contentP.textContent = runningContent;
+        });
+      })
+      .on('error', function(err) {
+        throw err;
+      })
+      .on('end', function() {
+        console.log('completed');
+      })
+      .end();
+    </script>
   </body>
 
 </html>

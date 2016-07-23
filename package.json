@@ -4,7 +4,8 @@
   "description": "Adds support to the superagent library for chunked-transfer encoded responses when in the browser.",
   "main": "index.js",
   "scripts": {
-    "build": "browserify -t uglifyify index.js -o ./test/browser/superagent-get-chunked.js && echo 'onmessage = function(e) {' > ./test/browser/superagent-get-chunked-worker.js && browserify -t uglifyify superagent-get-chunked.js >> ./test/browser/superagent-get-chunked-worker.js && echo '};' >> ./test/browser/superagent-get-chunked-worker.js && uglifyjs ./test/browser/superagent-get-chunked-worker.js -c -o ./test/browser/superagent-get-chunked-worker.min.js",
+    "build": "browserify -t uglifyify index.js --debug -o ./test/browser/superagent-get-chunked.js && echo 'onmessage = function(e) {' > ./test/browser/superagent-get-chunked-worker.js && browserify -t uglifyify superagent-get-chunked.js --debug >> ./test/browser/superagent-get-chunked-worker.js && echo '};' >> ./test/browser/superagent-get-chunked-worker.js && uglifyjs ./test/browser/superagent-get-chunked-worker.js -c --debug -o ./test/browser/superagent-get-chunked-worker.min.js",
+    "build:uncompressed": "browserify index.js -o ./test/browser/superagent-get-chunked.js && echo 'onmessage = function(e) {' > ./test/browser/superagent-get-chunked-worker.min.js && browserify superagent-get-chunked.js >> ./test/browser/superagent-get-chunked-worker.min.js && echo '};' >> ./test/browser/superagent-get-chunked-worker.min.js",
     "start": "echo 'Once build finishes, visit http://localhost:8080' && npm run build && cd ./test/browser && http-server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -23,10 +24,13 @@
   },
   "homepage": "https://github.com/ariutta/superagent-get-chunked#readme",
   "dependencies": {
+    "chunked-request": "^0.4.0",
+    "component-emitter": "^1.2.1",
     "superagent": "^2.1.0"
   },
   "devDependencies": {
     "browserify": "^13.0.1",
+    "component-emitter": "^1.2.1",
     "http-server": "^0.9.0",
     "uglify-js": "^2.7.0",
     "uglifyify": "^3.0.2"
