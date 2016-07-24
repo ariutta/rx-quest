@@ -1,5 +1,6 @@
 // wrapper opening will be automatically inserted here
 
+var _ = require('lodash');
 var chunkedRequest = require('chunked-request').default;
 var superagent = require('superagent');
 
@@ -24,50 +25,198 @@ function noop() {}
 // IANA entries (http://www.iana.org/assignments/media-types/media-types.xhtml)
 // and/or
 // W3C Recommendations
-var mappingsToExtensions = {
+var typeMappings = [{
   // CSV
-  'csv': 'csv',
-  'text/csv': 'csv',
+  extensions: [
+    'csv',
+  ],
+  contentTypes: [
+    'text/csv',
+  ],
+  parser: 'csv',
+}, {
   // N-Triples
   // https://www.w3.org/TeamSubmission/n3/#mimetype
-  'n3': 'n3',
-  'text/n3': 'n3',
+  extensions: [
+    'n3',
+  ],
+  contentTypes: [
+    'text/n3',
+  ],
+  parser: 'n3',
+}, {
   // Turtle
   // https://www.w3.org/TeamSubmission/turtle/#sec-mime
-  'ttl': 'n3',
-  'text/turtle': 'n3',
-  'application/x-turtle': 'n3',
+  extensions: [
+    'ttl',
+  ],
+  contentTypes: [
+    'text/turtle',
+    'application/x-turtle',
+  ],
+  parser: 'n3',
+}, {
   // N-Quads
   // https://www.w3.org/TR/n-quads/
-  'nq': 'n3',
-  'application/n-quads': 'n3',
+  extensions: [
+    'nq',
+  ],
+  contentTypes: [
+    'application/n-quads',
+  ],
+  parser: 'n3',
+}, {
   // TriG
   // https://www.w3.org/TR/trig/
-  'trig': 'n3',
-  'application/trig': 'n3',
+  extensions: [
+    'trig',
+  ],
+  contentTypes: [
+    'application/trig',
+  ],
+  parser: 'n3',
+}, {
   // New-line delimited JSON
-  'ndjson': 'ndjson',
-  'application/ndjson': 'ndjson',
-  'application/x-ndjson': 'ndjson',
+  extensions: [
+    'ndjson',
+  ],
+  contentTypes: [
+    'application/x-ndjson',
+    'application/ndjson',
+  ],
+  parser: '',
+}, {
   // TSV
-  'tsv': 'tsv',
-  'text/tab-separated-values': 'tsv',
-}
+  extensions: [
+    'tsv',
+  ],
+  contentTypes: [
+    'text/tab-separated-values',
+  ],
+  parser: 'tsv',
+}, {
+  // XML
+  extensions: [
+    'xml',
+  ],
+  contentTypes: [
+    'application/xml',
+    'text/xml',
+  ],
+  parser: 'xml',
+}];
+
+var inputTypeToParserMappings = typeMappings
+.reduce(function(acc, x) {
+  var parser = x.parser;
+  x.extensions.forEach(function(extension) {
+    acc[extension] = parser;
+  });
+  x.contentTypes.forEach(function(contentType) {
+    acc[contentType] = parser;
+  });
+  return acc;
+}, {})
+
+var inputTypeToAcceptHeaderMappings = typeMappings
+.reduce(function(acc, x) {
+  var contentTypes = x.contentTypes;
+  var acceptHeader = contentTypes
+  .map(function(contentType, index) {
+    var min = 0.8;
+    var decrement = 0;
+    if (index > 0) {
+      decrement = (index/Math.max(10, contentTypes.length));
+    }
+    var qvalue = Math.max(
+      (Math.round((1 - decrement) * 10) / 10),
+      min
+    );
+    return contentType + ';q=' + String(qvalue);
+  })
+  .concat(
+      // if we can't get application/ld+json, try just application/json
+      contentTypes
+      .map(function(contentType, index) {
+        var max = 0.7;
+        var min = 0.5;
+        var decrement = 0;
+        if (index > 0) {
+          decrement = (index/Math.max(10, contentTypes.length));
+        }
+        var qvalue = Math.max(
+            Math.min(
+                (Math.round((1 - decrement) * 10) / 10),
+                max
+            ),
+            min
+        );
+
+        var components = contentType.split('/');
+        var typeName = components[0];
+        var subTypeName = components.pop();
+        var baseSubTypeName = subTypeName.split('+').pop();
+
+        if (subTypeName !== baseSubTypeName) {
+          return typeName + '/' + baseSubTypeName + ';q=' + String(qvalue);
+        }
+      })
+      .filter(function(x) {
+        return _.isString(x);
+      })
+  )
+  .concat(
+      // if we can't get application/xml, try application/* or */xml
+      contentTypes
+      .map(function(contentType, index) {
+        var max = 0.4;
+        var min = 0.2;
+        var decrement = 0;
+        if (index > 0) {
+          decrement = (index/Math.max(10, contentTypes.length));
+        }
+        var qvalue = Math.max(
+            Math.min(
+                (Math.round((1 - decrement) * 10) / 10),
+                max
+            ),
+            min
+        );
+
+        var components = contentType.split('/');
+        var typeName = components[0];
+        var subTypeName = components.pop();
+
+        return typeName + '/*' + ';q=' + String(qvalue) + ',' +
+               '*/' + subTypeName + ';q=' + String(qvalue);
+      })
+  )
+  .concat(['*/*;q=0.1'])
+  .join(',');
+
+  x.extensions.forEach(function(extension) {
+    acc[extension] = acceptHeader;
+  });
+  x.contentTypes.forEach(function(contentType) {
+    acc[contentType] = acceptHeader;
+  });
+  return acc;
+}, {})
 
 // To be used if no applicable parser is available
-var noopparser = function(rawChunk, previousChunkSuffix, isFinalChunk) {
+var noopParser = function(rawChunk, previousChunkSuffix, isFinalChunk) {
   return [[previousChunkSuffix, rawChunk].join('')];
 };
 
-var parser;
+var currentParser;
 // NOTE: worker-wide side effect
 function setParser(contentType, options) {
-  var extension = mappingsToExtensions[contentType];
+  var extension = inputTypeToParserMappings[contentType];
   if (extension) {
     importScripts(extension + '.js');
-    parser = root[extension + 'parser'](options);
+    currentParser = root[extension + 'parser'](options);
   } else {
-    parser = noopparser;
+    currentParser = noopParser;
   }
 }
 
@@ -91,16 +240,31 @@ var callstack = e.data.callstack;
 
 
 function get(input) {
+  var acceptHeader;
   var superagentApi = {
-    'accept': setParser,
+    'accept': function(contentType) {
+      setParser(contentType);
+      acceptHeader = inputTypeToAcceptHeaderMappings[contentType];
+    },
     'end': function() {
-      chunkedRequest({
+      var url = input[0];
+
+      if (currentParser === noopParser) {
+        // TODO how can I get the response headers
+        // to look at the content type?
+
+        // If neither the accept request header nor
+        // the content type response header are specified,
+        // we make a last ditch effort to determine
+        // content type via file name extension.
+        var extension = url.split('.').pop();
+        setParser(extension);
+      }
+      var chunkedRequestInput = {
         url: input[0],
         method: 'GET',
-        //headers: { /*...*/ },
-        chunkParser: parser,
+        chunkParser: currentParser,
         onChunk: function(err, parsedChunk) {
-          console.log('chunk parsed');
           if (err) {
             console.error('err56');
             console.error(err);
@@ -128,7 +292,13 @@ function get(input) {
             type: 'complete'
           });
         }
-      });
+      };
+      if (acceptHeader) {
+        chunkedRequestInput.headers = {
+          'accept': acceptHeader
+        };
+      }
+      chunkedRequest(chunkedRequestInput);
     }
   };
 

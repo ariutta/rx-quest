@@ -5,13 +5,13 @@
   "main": "index.js",
   "scripts": {
     "build": "npm run compile && npm run compress",
-    "compile": "npm-run-all compile:* && npm run cp",
-    "compile:main": "browserify index.js -o ./test/browser/superagent-get-chunked.js && echo 'onmessage = function(e) {' > ./test/browser/superagent-get-chunked-worker.js && browserify ./superagent-worker-body.js >> ./test/browser/superagent-get-chunked-worker.js && echo '};' >> ./test/browser/superagent-get-chunked-worker.js",
+    "compile": "npm-run-all compile:*",
+    "compile:main": "browserify index.js -o ./test/browser/superagent-get-chunked.js && echo 'onmessage = function(e) {' > ./test/browser/superagent-get-chunked-worker.js && browserify ./superagent-worker-body.js >> ./test/browser/superagent-get-chunked-worker.js && echo '};' >> ./test/browser/superagent-get-chunked-worker.js && cp ./test/browser/superagent-get-chunked-worker.js ./test/browser/superagent-get-chunked-worker.min.js",
     "compile:csv": "browserify ./csv.js --standalone csvparser -o ./test/browser/csv.js",
     "compile:ndjson": "browserify ./ndjson.js --standalone ndjsonparser -o ./test/browser/ndjson.js",
     "compile:n3": "browserify ./n3.js --standalone n3parser -o ./test/browser/n3.js",
     "compile:tsv": "browserify ./tsv.js --standalone tsvparser -o ./test/browser/tsv.js",
-    "cp": "cp ./test/browser/superagent-get-chunked-worker.js ./test/browser/superagent-get-chunked-worker.min.js && cp ./hello-world.js ./test/browser/hello-world.js && cp ./custom-parser.js ./test/browser/custom-parser.js",
+    "compile:xml": "browserify ./xml.js --standalone xmlparser -o ./test/browser/xml.js",
     "compress": "uglifyjs ./test/browser/superagent-get-chunked-worker.js -c --debug -o ./test/browser/superagent-get-chunked-worker.min.js",
     "installCustomChunkedRequest": "cd ./node_modules && rm -rf ./chunked-request && git clone https://github.com/ariutta/chunked-request.git && cd ./chunked-request && npm install && npm run prepublish && cd ../..",
     "postinstall": "npm run installCustomChunkedRequest",
@@ -37,9 +37,11 @@
     "component-emitter": "^1.2.1",
     "install": "^0.8.1",
     "js-csvparser": "^1.4.0",
+    "lodash": "^4.13.1",
     "n3": "^0.5.0",
     "npm": "^3.10.5",
     "npm-run-all": "^2.3.0",
+    "sax": "^1.2.1",
     "superagent": "^2.1.0"
   },
   "devDependencies": {
