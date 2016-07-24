@@ -4,8 +4,17 @@
   "description": "Adds support to the superagent library for chunked-transfer encoded responses when in the browser.",
   "main": "index.js",
   "scripts": {
-    "build": "browserify -t uglifyify index.js --debug -o ./test/browser/superagent-get-chunked.js && echo 'onmessage = function(e) {' > ./test/browser/superagent-get-chunked-worker.js && browserify -t uglifyify superagent-get-chunked.js --debug >> ./test/browser/superagent-get-chunked-worker.js && echo '};' >> ./test/browser/superagent-get-chunked-worker.js && uglifyjs ./test/browser/superagent-get-chunked-worker.js -c --debug -o ./test/browser/superagent-get-chunked-worker.min.js",
-    "build:uncompressed": "browserify index.js -o ./test/browser/superagent-get-chunked.js && echo 'onmessage = function(e) {' > ./test/browser/superagent-get-chunked-worker.min.js && browserify superagent-get-chunked.js >> ./test/browser/superagent-get-chunked-worker.min.js && echo '};' >> ./test/browser/superagent-get-chunked-worker.min.js",
+    "build": "npm run compile && npm run compress",
+    "compile": "npm-run-all compile:* && npm run cp",
+    "compile:main": "browserify index.js -o ./test/browser/superagent-get-chunked.js && echo 'onmessage = function(e) {' > ./test/browser/superagent-get-chunked-worker.js && browserify ./superagent-worker-body.js >> ./test/browser/superagent-get-chunked-worker.js && echo '};' >> ./test/browser/superagent-get-chunked-worker.js",
+    "compile:csv": "browserify ./csv.js --standalone csvparser -o ./test/browser/csv.js",
+    "compile:ndjson": "browserify ./ndjson.js --standalone ndjsonparser -o ./test/browser/ndjson.js",
+    "compile:n3": "browserify ./n3.js --standalone n3parser -o ./test/browser/n3.js",
+    "compile:tsv": "browserify ./tsv.js --standalone tsvparser -o ./test/browser/tsv.js",
+    "cp": "cp ./test/browser/superagent-get-chunked-worker.js ./test/browser/superagent-get-chunked-worker.min.js && cp ./hello-world.js ./test/browser/hello-world.js && cp ./custom-parser.js ./test/browser/custom-parser.js",
+    "compress": "uglifyjs ./test/browser/superagent-get-chunked-worker.js -c --debug -o ./test/browser/superagent-get-chunked-worker.min.js",
+    "installCustomChunkedRequest": "cd ./node_modules && rm -rf ./chunked-request && git clone https://github.com/ariutta/chunked-request.git && cd ./chunked-request && npm install && npm run prepublish && cd ../..",
+    "postinstall": "npm run installCustomChunkedRequest",
     "start": "echo 'Once build finishes, visit http://localhost:8080' && npm run build && cd ./test/browser && http-server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -26,6 +35,11 @@
   "dependencies": {
     "chunked-request": "ariutta/chunked-request#30bd49c6c2435255697240f9028438a5b5808cf0",
     "component-emitter": "^1.2.1",
+    "install": "^0.8.1",
+    "js-csvparser": "^1.4.0",
+    "n3": "^0.5.0",
+    "npm": "^3.10.5",
+    "npm-run-all": "^2.3.0",
     "superagent": "^2.1.0"
   },
   "devDependencies": {

@@ -36,22 +36,29 @@ var methods = [
   'timeout',
 ];
 
+function addToCallstack(callstack, method, args) {
+  var callElement = {};
+  callElement.name = method;
+  callElement.args = args;
+  callstack.push(callElement);
+  return callstack;
+}
+
 methods.forEach(function(method) {
   Superagent.prototype[method] = function(name) {
+    var that = this;
+    var callstack = that.callstack;
     var args = Array.prototype.slice.call(arguments);
-    var callElement = {};
-    callElement.name = method;
-    callElement.args = args;
-    this.callstack.push(callElement);
-    console.log('callstack');
-    console.log(this.callstack);
-    return this;
+    addToCallstack(callstack, method, args);
+    return that;
   };
 });
 
 Superagent.prototype.end = function() {
   var that = this;
   var callstack = that.callstack;
+  var args = Array.prototype.slice.call(arguments);
+  addToCallstack(callstack, 'end', args);
 
   var requestWorker = new Worker('superagent-get-chunked-worker.min.js');
   requestWorker.onmessage = function(oEvent) {
