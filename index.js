@@ -11,7 +11,6 @@ var Superagent = function() {
     callElement.args = args;
     this.callstack.push(callElement);
   }
-
 };
 
 var methods = [
