@@ -2,15 +2,82 @@
 <html>
 
   <head>
+    <!-- Load c3.css -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/c3/0.4.11/c3.min.css" rel="stylesheet" type="text/css">
 
+    <!-- Load d3.js and c3.js -->
+    <script src="./c3.js"></script>
   </head>
 
   <body>
-    <p>Watch the data load incrementally. Status: <span id="display-status">waiting</span></p>
-    <p id="display-content" style="font-size: 10px;">Nothing yet...</p>
+    <div id="content">
+      <p>Watch the data load incrementally. Status: <span id="display-status">waiting</span></p>
+      <p id="display-progress">Progress: </p>
+      <p>The celestial bodies should keep moving smoothly, even during loading and parsing of data:</p>
+      <!-- Learn about this code on MDN: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Basic_animations -->
+      <canvas id="canvas" width="300" height="300"></canvas>
+      <div id="chart"></div>
+      <p>Parsed response chunks can be viewed in the console.</p>
+    </div>
 
-    <script src="superagent-get-chunked.js"></script>
+    <script src="./superagent-get-chunked.js"></script>
+
     <script>
+      var sun = new Image();
+      var moon = new Image();
+      var earth = new Image();
+      function init(){
+        sun.src = 'https://mdn.mozillademos.org/files/1456/Canvas_sun.png';
+        moon.src = 'https://mdn.mozillademos.org/files/1443/Canvas_moon.png';
+        earth.src = 'https://mdn.mozillademos.org/files/1429/Canvas_earth.png';
+        window.requestAnimationFrame(draw);
+      }
+
+      function draw() {
+        var ctx = document.getElementById('canvas').getContext('2d');
+
+        ctx.globalCompositeOperation = 'destination-over';
+        ctx.clearRect(0,0,300,300); // clear canvas
+
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        ctx.strokeStyle = 'rgba(0,153,255,0.4)';
+        ctx.save();
+        ctx.translate(150,150);
+
+        // Earth
+        var time = new Date();
+        ctx.rotate( ((2*Math.PI)/60)*time.getSeconds() + ((2*Math.PI)/60000)*time.getMilliseconds() );
+        ctx.translate(105,0);
+        ctx.fillRect(0,-12,50,24); // Shadow
+        ctx.drawImage(earth,-12,-12);
+
+        // Moon
+        ctx.save();
+        ctx.rotate( ((2*Math.PI)/6)*time.getSeconds() + ((2*Math.PI)/6000)*time.getMilliseconds() );
+        ctx.translate(0,28.5);
+        ctx.drawImage(moon,-3.5,-3.5);
+        ctx.restore();
+
+        ctx.restore();
+        
+        ctx.beginPath();
+        ctx.arc(150,150,105,0,Math.PI*2,false); // Earth orbit
+        ctx.stroke();
+       
+        ctx.drawImage(sun,0,0,300,300);
+
+        window.requestAnimationFrame(draw);
+      }
+
+      init();
+    </script>
+
+    <script>
+      // You can change these values
+      var chartEnabled = true;
+      var selectedInputIndex = 3;
+
+      // These should generally not be changed.
       var inputs = [{
         accept: 'text/tab-separated-values',
         url: 'http://webservice.bridgedb.org/Human/xrefs/L/4292',
@@ -47,33 +114,33 @@
         fontSize: '10px',
       }];
 
-      var selectedInput = inputs[7];
+      var selectedInput = inputs[selectedInputIndex];
 
       var status = 'loading';
+      var totalLoaded = 0
+
       var statusP = document.querySelector('#display-status');
+      statusP.textContent = status;
 
-      statusP.textContent = status + ' at ' + new Date().toISOString();
+      var progressP = document.querySelector('#display-progress');
 
-      function showStatus() {
-        if (status === 'loading') {
-          window.requestAnimationFrame(function() {
-            statusP.textContent = status + ' at ' + new Date().toISOString();
-            showStatus();
-          });
-        }
-      }
-      showStatus();
-
-      var contentP = document.querySelector('#display-content');
-
-      contentP.style.fontSize = selectedInput.fontSize;
-      contentP.style.backgroundColor = 'lightgreen';
-
+      var chunkStringLengthsColumn = ['Chunk Number'];
+      var dataEventCount = 0;
       request
       .get(selectedInput.url)
       .accept(selectedInput.accept)
-      .on('data', function(data) {
-        contentP.textContent = JSON.stringify(data);
+      .on('data', function(chunk) {
+        dataEventCount += 1;
+        var chunkAsString = JSON.stringify(chunk);
+        var chunkAsStringLength = chunkAsString.length;
+        totalLoaded += chunkAsStringLength;
+        chunkStringLengthsColumn.push(chunkAsStringLength)
+        window.requestAnimationFrame(function() {
+          console.log('chunk');
+          console.log(chunk);
+          statusP.textContent = status + '. Chunks Loaded: ' + String(dataEventCount) + '. Characters Loaded: ' + String(totalLoaded) + '.';
+          progressP.textContent += '|';
+        });
       })
       .on('error', function(err) {
         throw err;
@@ -81,6 +148,24 @@
       .on('end', function() {
         status = 'complete';
         statusP.textContent = status;
+        if (chartEnabled) {
+          var chart = c3.generate({
+            bindto: '#chart',
+            data: {
+              columns: [
+                chunkStringLengthsColumn
+              ]
+            },
+            axis: {
+              y: {
+                label: {
+                  text: 'Chunk Size',
+                  position: 'outer-middle'
+                }
+              }
+            }
+          });
+        }
       })
       .end();
     </script>

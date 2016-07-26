@@ -1,7 +1,8 @@
 // wrapper opening will be automatically inserted here
 
 var _ = require('lodash');
-var chunkedRequest = require('chunked-request').default;
+
+var requests = require('requests');
 var superagent = require('superagent');
 
 /**
@@ -15,11 +16,9 @@ if (typeof window !== 'undefined') { // Browser window
 } else if (typeof self !== 'undefined') { // Web Worker
   root = self;
 } else { // Other environments
-  console.warn("Using browser-only version of superagent-get-chunked in non-browser environment");
+  console.warn('Using browser-only version of superagent-get-chunked in non-browser environment');
   root = this;
 }
-
-function noop() {}
 
 // Highly recommend that these be based on
 // IANA entries (http://www.iana.org/assignments/media-types/media-types.xhtml)
@@ -84,7 +83,7 @@ var typeMappings = [{
     'application/x-ndjson',
     'application/ndjson',
   ],
-  parser: '',
+  parser: 'ndjson',
 }, {
   // TSV
   extensions: [
@@ -203,43 +202,26 @@ var inputTypeToAcceptHeaderMappings = typeMappings
   return acc;
 }, {})
 
-// To be used if no applicable parser is available
-var noopParser = function(rawChunk, previousChunkSuffix, isFinalChunk) {
-  return [[previousChunkSuffix, rawChunk].join('')];
-};
-
 var currentParser;
-// NOTE: worker-wide side effect
+var usingNoopParser;
+// NOTE: two worker-wide side effects
 function setParser(contentType, options) {
   var extension = inputTypeToParserMappings[contentType];
-  if (extension) {
-    importScripts(extension + '.js');
-    currentParser = root[extension + 'parser'](options);
+  if (!extension) {
+    // To be used if no applicable parser is available
+    extension = 'noop';
+    usingNoopParser = true;
   } else {
-    currentParser = noopParser;
+    usingNoopParser = false;
   }
+  importScripts(extension + '.js');
+  currentParser = root[extension + 'parser'](options);
 }
 
 var callstack = e.data.callstack;
 
-//function post(input) {
-//  console.log('input24');
-//  console.log(input);
-//
-//  chunkedRequest({
-//    url: input,
-//    method: 'POST',
-//    headers: { /*...*/ },
-//    body: JSON.stringify({ /*...*/ }),
-//    credentials: 'include',
-//    chunkParser(rawChunk) { /*...*/ },
-//    onChunk(err, parsedChunk) { /*...*/ },
-//    onComplete(result) { /*...*/ }
-//  });
-//});
-
-
 function get(input) {
+  var that = this;
   var acceptHeader;
   var superagentApi = {
     'accept': function(contentType) {
@@ -249,7 +231,7 @@ function get(input) {
     'end': function() {
       var url = input[0];
 
-      if (currentParser === noopParser) {
+      if (usingNoopParser) {
         // TODO how can I get the response headers
         // to look at the content type?
 
@@ -260,45 +242,61 @@ function get(input) {
         var extension = url.split('.').pop();
         setParser(extension);
       }
-      var chunkedRequestInput = {
-        url: input[0],
-        method: 'GET',
-        chunkParser: currentParser,
-        onChunk: function(err, parsedChunk) {
-          if (err) {
-            console.error('err56');
-            console.error(err);
-            // TODO this seems odd
-            var errJSON = {};
-            errJSON.message = err.message;
-            errJSON.stack = JSON.parse(JSON.stringify(err.stack));
-            postMessage({
-              body: errJSON,
-              type: 'error'
-            });
-            // TODO does this happen automatically?
-            return close();
-          }
 
-          postMessage({
-            body: parsedChunk,
-            type: 'next'
-          });
-        },
-        onComplete: function(result) {
-          var resultJSON = JSON.parse(JSON.stringify(result));
-          postMessage({
-            body: resultJSON,
-            type: 'complete'
-          });
-        }
+      var options = {
+        method: 'GET',
+        streaming: true
       };
+
+      options.headers = options.headers || {};
       if (acceptHeader) {
-        chunkedRequestInput.headers = {
-          'accept': acceptHeader
-        };
+        options.headers.accept = acceptHeader;
       }
-      chunkedRequest(chunkedRequestInput);
+
+      //options.headers['Access-Control-Allow-Origin'] = '*';
+
+      requests.call(that, url, options)
+      .on('data', function (chunk) {
+        currentParser.write(chunk);
+      })
+      .on('end', function(err) {
+        if (err) {
+          throw err;
+          // TODO how to handle errors?
+          //currentParser.emit('error', err);
+        }
+        currentParser.close();
+      });
+
+      currentParser
+      .on('data', function(parsedChunk) {
+        var dataString = JSON.stringify(parsedChunk);
+        postMessage({
+          body: parsedChunk,
+          type: 'data'
+        });
+      })
+      .on('error', function(err) {
+        console.error('err56');
+        console.error(err);
+        // TODO this seems odd
+        var errJSON = {};
+        errJSON.message = err.message;
+        errJSON.stack = JSON.parse(JSON.stringify(err.stack));
+        postMessage({
+          body: errJSON,
+          type: 'error'
+        });
+        // TODO does this happen automatically?
+        return close();
+      })
+      .on('end', function(x) {
+        postMessage({
+          // TODO will x ever be anything?
+          result: x,
+          type: 'end'
+        });
+      });
     }
   };
 
@@ -306,61 +304,6 @@ function get(input) {
 
   return superagentApi;
 }
-
-//function get(input) {
-//  var XHR = 'xhr';
-//
-//  var index = 0;
-//
-//  var myresponse = superagent.get(input, noop);
-//  var xhr = myresponse.xhr;
-//
-//  // drawing on code from here:
-//  // https://github.com/jonnyreeves/chunked-request/blob/master/src/impl/xhr.js
-//  function onProgressEvent() {
-//    var rawChunk = xhr.responseText.substr(index);
-//    index = xhr.responseText.length;
-//    postMessage({
-//      body: rawChunk,
-//      type: 'next'
-//    });
-//  }
-//
-//  function onLoadEvent() {
-//    var xhrJSON = JSON.parse(JSON.stringify(xhr));
-//    var message = {
-//      statusCode: xhr.status,
-//      transport: XHR,
-//      raw: xhrJSON
-//    };
-//    postMessage({
-//      body: message,
-//      type: 'completed'
-//    });
-//  }
-//
-//  function onError(err) {
-//    console.error('err56');
-//    console.error(err);
-//    // TODO this seems odd
-//    err = JSON.parse(JSON.stringify(err));
-//    var message = {
-//      statusCode: 0,
-//      transport: XHR,
-//      raw: err
-//    };
-//    postMessage({
-//      body: message,
-//      type: 'error'
-//    });
-//    // TODO does this happen automatically?
-//    close();
-//  }
-//
-//  xhr.addEventListener('progress', onProgressEvent);
-//  xhr.addEventListener('loadend', onLoadEvent);
-//  xhr.addEventListener('error', onError);
-//}
 
 function endCb(result) {
   var resultJSON = JSON.parse(JSON.stringify(result));

@@ -1,4 +1,5 @@
 var sax = require('sax');
+// TODO look at gpml2pvjson converter to make this convert XML to JXON, as per MDN
  
 module.exports = function(options) {
   options = (typeof options === 'object') ? options : {};
@@ -39,7 +40,7 @@ module.exports = function(options) {
         tag: parser.tag,
       });
     };
-  })
+  });
 
   parser.onend = function () {
     // parser stream is done, and ready to have more stuff written to it. 

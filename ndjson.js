@@ -1,5 +1,7 @@
+var ndjson = require('ndjson')
+ 
 module.exports = function(options) {
-  // the ndjson parser is built into the chunked-request library:
-  // https://github.com/jonnyreeves/chunked-request#chunkparser-optional
-  return;
+  options = (typeof options === 'object') ? options : {};
+  return ndjson.parse(options);
 };
+  

@@ -62,11 +62,13 @@ Superagent.prototype.end = function() {
   var requestWorker = new Worker('superagent-get-chunked-worker.min.js');
   requestWorker.onmessage = function(oEvent) {
     var data = oEvent.data;
+    //console.log('data in index.js');
+    //console.log(data);
     var type = data.type;
     var body = data.body;
-    if (type === 'next') {
+    if (type === 'data') {
       that.emit('data', body);
-    } else if (type === 'complete') {
+    } else if (type === 'end') {
       that.emit('end', body);
     }
   };
