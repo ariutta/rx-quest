@@ -11,7 +11,7 @@
     "compile:csv": "browserify ./lib/parsers/csv.js --standalone csvparser -o ./test/browser/csv.js",
     "compile:json": "browserify ./lib/parsers/json.js --standalone jsonparser -o ./test/browser/json.js",
     "compile:ndjson": "browserify ./lib/parsers/ndjson.js --standalone ndjsonparser -o ./test/browser/ndjson.js",
-    "compile:n3": "browserify ./lib/parsers/n3.js --standalone n3parser -o ./test/browser/n3.js",
+    "compile:text_n3": "browserify ./lib/parsers/text_n3.js --standalone text_n3 -o ./test/browser/text_n3.js",
     "compile:noop": "browserify ./lib/parsers/noop.js --standalone noopparser -o ./test/browser/noop.js",
     "compile:tsv": "browserify ./lib/parsers/tsv.js --standalone tsvparser -o ./test/browser/tsv.js",
     "compile:xml": "browserify ./lib/parsers/xml.js --standalone xmlparser -o ./test/browser/xml.js",
@@ -37,6 +37,7 @@
   "dependencies": {
     "JSONStream": "^1.1.3",
     "component-emitter": "^1.2.1",
+    "event-emitter": "^0.3.4",
     "eventemitter3": "^1.2.0",
     "install": "^0.8.1",
     "js-csvparser": "^1.4.0",
