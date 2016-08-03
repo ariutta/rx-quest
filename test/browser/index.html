@@ -2,11 +2,9 @@
 <html>
 
   <head>
-    <!-- Load c3.css -->
+    <!-- Load c3 -->
     <link href="//cdnjs.cloudflare.com/ajax/libs/c3/0.4.11/c3.min.css" rel="stylesheet" type="text/css">
-
-    <!-- Load d3.js and c3.js -->
-    <script src="./c3.js"></script>
+    <script src="./c3.bundle.js"></script>
   </head>
 
   <body>
@@ -17,7 +15,8 @@
       <!-- Learn about this code on MDN: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Basic_animations -->
       <canvas id="canvas" width="300" height="300"></canvas>
       <div id="chart"></div>
-      <p>Parsed response chunks can be viewed in the console.</p>
+      <p>The final parsed response chunk will be shown below (truncated, if needed, to limit to 10k characters).</p>
+      <div id="final-chunk"></div>
     </div>
 
     <script src="./superagent-get-chunked.js"></script>
@@ -75,10 +74,21 @@
     <script>
       // You can change these values
       var chartEnabled = true;
-      var selectedInputIndex = 3;
+      var selectedInputIndex = 6;
 
       // These should generally not be changed.
       var inputs = [{
+        accept: 'text/tab-separated-values',
+        url: 'http://webservice.bridgedb.org/Human/xrefs/L/4292',
+        fontSize: '5px',
+        parser: {
+          type: 'text/tab-separated-values',
+          options: {
+            headers: ['identifier', 'db'],
+            skipEmptyLines: true
+          }
+        }
+      }, {
         accept: 'text/tab-separated-values',
         url: 'http://webservice.bridgedb.org/Human/xrefs/L/4292',
         fontSize: '5px',
@@ -87,6 +97,22 @@
         accept: 'tsv',
         url: 'https://cdn.rawgit.com/nrnb/mirna-pathway-finder/master/wp-mir-table-builder/mir-gene-targets.txt',
         fontSize: '5px',
+        parser: {
+          type: 'text/tab-separated-values',
+          options: {
+            headers: true,
+            skipEmptyLines: true
+          }
+        }
+      }, {
+        // large file!
+        accept: 'json',
+        url: 'https://cdn.rawgit.com/dominictarr/JSONStream/master/test/fixtures/all_npm.json',
+        fontSize: '8px',
+        parser: {
+          type: 'application/json',
+          options: ['rows.*'],
+        },
       }, {
         accept: 'json',
         url: 'https://publicdata-weather.firebaseio.com/sanfrancisco/.json',
@@ -124,30 +150,45 @@
 
       var progressP = document.querySelector('#display-progress');
 
+      var finalChunkAsString;
       var chunkStringLengthsColumn = ['Chunk Number'];
       var dataEventCount = 0;
-      request
-      .get(selectedInput.url)
-      .accept(selectedInput.accept)
+      requests(selectedInput.url, {
+        headers: {
+          Accept: selectedInput.accept,
+        },
+        streaming: true,
+        parser: selectedInput.parser
+//        parser: {
+//          type: ''
+//          options: {
+//
+//          }
+//        }
+      })
       .on('data', function(chunk) {
         dataEventCount += 1;
         var chunkAsString = JSON.stringify(chunk);
+        finalChunkAsString = chunkAsString;
         var chunkAsStringLength = chunkAsString.length;
         totalLoaded += chunkAsStringLength;
         chunkStringLengthsColumn.push(chunkAsStringLength)
         window.requestAnimationFrame(function() {
-          console.log('chunk');
-          console.log(chunk);
+          //console.log('chunk in index.html');
+          //console.log(chunk);
           statusP.textContent = status + '. Chunks Loaded: ' + String(dataEventCount) + '. Characters Loaded: ' + String(totalLoaded) + '.';
           progressP.textContent += '|';
         });
       })
       .on('error', function(err) {
+        console.error(err.message);
+        console.error(err.stack);
         throw err;
       })
       .on('end', function() {
         status = 'complete';
         statusP.textContent = status;
+        document.querySelector('#canvas').style.display = 'none';
         if (chartEnabled) {
           var chart = c3.generate({
             bindto: '#chart',
@@ -166,8 +207,8 @@
             }
           });
         }
-      })
-      .end();
+        document.querySelector('#final-chunk').textContent = finalChunkAsString.slice(0, 10 * 1000);
+      });
     </script>
   </body>
 
