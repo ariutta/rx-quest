@@ -55,6 +55,7 @@
     "ys-hash": "^0.1.2"
   },
   "devDependencies": {
+    "assert": "^1.4.1",
     "browserify": "^13.0.1",
     "c3": "^0.4.11",
     "component-emitter": "^1.2.1",
