@@ -6,15 +6,15 @@
   "scripts": {
     "build": "npm run compile && npm run compress",
     "compile": "npm-run-all compile:*",
-    "compile:main": "browserify index.js --debug -o ./test/browser/superagent-get-chunked.js && echo 'onmessage = function(e) {' > ./test/browser/superagent-get-chunked-worker.js && browserify ./lib/superagent-worker-body.js >> ./test/browser/superagent-get-chunked-worker.js && echo '};' >> ./test/browser/superagent-get-chunked-worker.js && cp ./test/browser/superagent-get-chunked-worker.js ./test/browser/superagent-get-chunked-worker.min.js",
+    "compile:main": "node ./lib/mask-maker.js && browserify index.js --debug -o ./test/browser/superagent-get-chunked.js && echo 'onmessage = function(e) {' > ./test/browser/superagent-get-chunked-worker.js && browserify ./lib/superagent-worker-body.js >> ./test/browser/superagent-get-chunked-worker.js && echo '};' >> ./test/browser/superagent-get-chunked-worker.js && cp ./test/browser/superagent-get-chunked-worker.js ./test/browser/superagent-get-chunked-worker.min.js && rm ./lib/inputTypeToParserBitmaskMappings.json",
     "compile:c3": "browserify ./test/browser/c3.js --standalone c3 -o ./test/browser/c3.bundle.js",
-    "compile:csv": "browserify ./lib/parsers/csv.js --standalone csvparser -o ./test/browser/csv.js",
-    "compile:json": "browserify ./lib/parsers/json.js --standalone jsonparser -o ./test/browser/json.js",
-    "compile:ndjson": "browserify ./lib/parsers/ndjson.js --standalone ndjsonparser -o ./test/browser/ndjson.js",
+    "compile.broken:application_json": "browserify ./lib/parsers/application_json.js --standalone application_json -o ./test/browser/application_json.js",
+    "compile:application_octet_stream": "browserify ./lib/parsers/application_octet_stream.js --standalone application_octet_stream -o ./test/browser/application_octet_stream.js",
+    "compile:application_x_ndjson": "browserify ./lib/parsers/application_x_ndjson.js --standalone application_x_ndjson -o ./test/browser/application_x_ndjson.js",
+    "compile.broken:application_xml": "browserify ./lib/parsers/application_xml.js --standalone application_xml -o ./test/browser/application_xml.js",
+    "compile.broken:text_csv": "browserify ./lib/parsers/text_csv.js --standalone text_csv -o ./test/browser/text_csv.js",
     "compile:text_n3": "browserify ./lib/parsers/text_n3.js --standalone text_n3 -o ./test/browser/text_n3.js",
-    "compile:noop": "browserify ./lib/parsers/noop.js --standalone noopparser -o ./test/browser/noop.js",
-    "compile:tsv": "browserify ./lib/parsers/tsv.js --standalone tsvparser -o ./test/browser/tsv.js",
-    "compile:xml": "browserify ./lib/parsers/xml.js --standalone xmlparser -o ./test/browser/xml.js",
+    "compile.broken:text_tsv": "browserify ./lib/parsers/text_tsv.js --standalone text_tsv -o ./test/browser/text_tsv.js",
     "compress": "uglifyjs ./test/browser/superagent-get-chunked-worker.js -c --debug -o ./test/browser/superagent-get-chunked-worker.min.js",
     "size": "browserify -g uglifyify ./size.js --standalone size | uglifyjs -c -o ./size.bundle.js && ls -lh | grep 'size.bundle.js' && rm ./size.bundle.js",
     "start": "echo 'Once build finishes, visit http://localhost:8080' && npm run build && cd ./test/browser && http-server",
@@ -36,6 +36,8 @@
   "homepage": "https://github.com/ariutta/superagent-get-chunked#readme",
   "dependencies": {
     "JSONStream": "^1.1.3",
+    "base58": "^0.1.0",
+    "bitmask": "young-steveo/bitmask.js#345d7088bc2f52a87a0e02c2a89b5f40f03c1d9d",
     "component-emitter": "^1.2.1",
     "event-emitter": "^0.3.4",
     "eventemitter3": "^1.2.0",
@@ -49,7 +51,8 @@
     "requests": "ariutta/requests#49d2a241e316ac28f30dc57c73d1f96b3a7cfcef",
     "rx-extra": "^1.0.2",
     "sax": "^1.2.1",
-    "superagent": "^2.1.0"
+    "superagent": "^2.1.0",
+    "ys-hash": "^0.1.2"
   },
   "devDependencies": {
     "browserify": "^13.0.1",
