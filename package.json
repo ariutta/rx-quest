@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npm run compile && npm run compress",
     "compile": "npm-run-all compile:*",
-    "compile:main": "node ./lib/mask-maker.js && browserify index.js --debug -o ./test/browser/superagent-get-chunked.js && echo 'onmessage = function(e) {' > ./test/browser/superagent-get-chunked-worker.js && browserify ./lib/superagent-worker-body.js >> ./test/browser/superagent-get-chunked-worker.js && echo '};' >> ./test/browser/superagent-get-chunked-worker.js && cp ./test/browser/superagent-get-chunked-worker.js ./test/browser/superagent-get-chunked-worker.min.js && rm ./lib/inputTypeToParserBitmaskMappings.json",
+    "compile:main": "node ./build/mask-maker.js && browserify index.js --debug -o ./test/browser/superagent-get-chunked.js && echo 'onmessage = function(e) {' > ./test/browser/superagent-get-chunked-worker.js && browserify ./lib/superagent-worker-body.js >> ./test/browser/superagent-get-chunked-worker.js && echo '};' >> ./test/browser/superagent-get-chunked-worker.js && cp ./test/browser/superagent-get-chunked-worker.js ./test/browser/superagent-get-chunked-worker.min.js && node ./build/mask-maker-test.js",
     "compile:c3": "browserify ./test/browser/c3.js --standalone c3 -o ./test/browser/c3.bundle.js",
     "compile.broken:application_json": "browserify ./lib/parsers/application_json.js --standalone application_json -o ./test/browser/application_json.js",
     "compile:application_octet_stream": "browserify ./lib/parsers/application_octet_stream.js --standalone application_octet_stream -o ./test/browser/application_octet_stream.js",

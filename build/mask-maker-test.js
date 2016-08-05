@@ -4,8 +4,17 @@ var assert = require('assert');
 var Bitmask = require('bitmask');
 var fs = require('fs');
 var hashTiny = require('../lib/hash-tiny.js');
-var inputTypeToParserBitmaskMappings = require('./inputTypeToParserBitmaskMappings.json');
-var orderedTags = require('./orderedTags.json');
+var path = require('path');
+
+var inputTypeToParserBitmaskMappingsPath = path.join(
+    __dirname,
+    '..',
+    'lib',
+    'inputTypeToParserBitmaskMappings.json'
+);
+var inputTypeToParserBitmaskMappings = require(inputTypeToParserBitmaskMappingsPath);
+var orderedTagsPath = path.join(__dirname, '..', 'lib', 'orderedTags.json');
+var orderedTags = require(orderedTagsPath);
 
 var mask = new Bitmask();
 assert(_.isEmpty(Bitmask.inspect(mask)));
@@ -39,3 +48,6 @@ assert(getParserContentTypeFromInputType('csv') === 'text/csv');
 
 assert(getParserContentTypeFromInputType('application/xml') === 'application/xml');
 assert(getParserContentTypeFromInputType('xml') === 'application/xml');
+
+fs.unlinkSync(inputTypeToParserBitmaskMappingsPath);
+fs.unlinkSync(orderedTagsPath);

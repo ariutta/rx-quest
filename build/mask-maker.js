@@ -4,7 +4,6 @@ var Bitmask = require('bitmask');
 var hashTiny = require('../lib/hash-tiny.js');
 var fs = require('fs');
 var path = require('path');
-var spawn = require('child_process').spawn;
 
 var typeMappings = [{
   // CSV
@@ -149,24 +148,25 @@ var inputTypeToParserBitmaskMappings = inputTypesByParser
 });
 
 fs.writeFileSync(
-    path.join(__dirname, 'orderedTags.json'),
-    JSON.stringify(orderedTags),
-    {encoding: 'utf8'}
-);
-
-fs.writeFileSync(
-    path.join(__dirname, 'inputTypeToParserBitmaskMappings.json'),
+    path.join(__dirname, '..', 'lib', 'inputTypeToParserBitmaskMappings.json'),
     JSON.stringify(inputTypeToParserBitmaskMappings),
     {encoding: 'utf8'}
 );
 
-var test = spawn('node', [path.join(__dirname, 'mask-maker-test.js')]);
-test.stdout.on('data', (data) => {
-  console.log(` ${data}`);
-});
-test.stderr.on('data', (data) => {
-  console.log(` ${data}`);
-});
-test.on('close', (code) => {
-  console.log(`child process exited with code ${code}`);
-});
+fs.writeFileSync(
+    path.join(__dirname, '..', 'lib', 'orderedTags.json'),
+    JSON.stringify(orderedTags),
+    {encoding: 'utf8'}
+);
+
+//var spawn = require('child_process').spawn;
+//var test = spawn('node', [path.join(__dirname, 'mask-maker-test.js')]);
+//test.stdout.on('data', (data) => {
+//  console.log(` ${data}`);
+//});
+//test.stderr.on('data', (data) => {
+//  console.log(` ${data}`);
+//});
+//test.on('close', (code) => {
+//  console.log(`child process exited with code ${code}`);
+//});
