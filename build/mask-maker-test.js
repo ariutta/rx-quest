@@ -16,6 +16,11 @@ var inputTypeToParserBitmaskMappings = require(inputTypeToParserBitmaskMappingsP
 var orderedTagsPath = path.join(__dirname, '..', 'lib', 'orderedTags.json');
 var orderedTags = require(orderedTagsPath);
 
+//console.log('inputTypeToParserBitmaskMappings');
+//console.log(inputTypeToParserBitmaskMappings);
+//console.log('orderedTags');
+//console.log(orderedTags);
+
 var mask = new Bitmask();
 assert(_.isEmpty(Bitmask.inspect(mask)));
 
@@ -40,7 +45,8 @@ function getParserContentTypeFromInputType(inputType) {
 assert(getParserContentTypeFromInputType('json') === 'application/json');
 assert(getParserContentTypeFromInputType('application/json') === 'application/json');
 
-console.log(getParserContentTypeFromInputType('application/ld+json'));
+// TODO use better getParserContentTypeFromInputType to handle application/ld+json
+//console.log(getParserContentTypeFromInputType('application/ld+json'));
 //assert(getParserContentTypeFromInputType('application/ld+json') === 'application/json');
 
 assert(getParserContentTypeFromInputType('text/csv') === 'text/csv');
