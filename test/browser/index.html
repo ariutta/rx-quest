@@ -13,18 +13,18 @@
       <p>Watch the data load incrementally. Status: <span id="display-status">waiting</span></p>
       <p id="display-progress">Progress: </p>
       <p>The celestial bodies should keep moving smoothly, even during loading and parsing of data:</p>
+      <p>The final parsed response chunk will be shown below (truncated, if needed, to limit to 10k characters).</p>
+      <div id="final-chunk"></div>
       <!-- Learn about this code on MDN: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Basic_animations -->
       <canvas id="canvas" width="300" height="300"></canvas>
       <div id="chart"></div>
-      <p>The final parsed response chunk will be shown below (truncated, if needed, to limit to 10k characters).</p>
-      <div id="final-chunk"></div>
     </div>
 
-    <script src="./superagent-get-chunked.js"></script>
     <script src="./animation.js"></script>
+    <script src="./superagent-get-chunked.js"></script>
 
     <script>
-      var chartEnabled = false;
+      var chartEnabled = true;
 
       var inputs = [{
         accept: 'text/tab-separated-values',
