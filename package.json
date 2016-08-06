@@ -11,7 +11,7 @@
     "compile:application_json": "browserify ./lib/parsers/application_json.js --standalone application_json -o ./test/browser/application_json.js",
     "compile:application_octet_stream": "browserify ./lib/parsers/application_octet_stream.js --standalone application_octet_stream -o ./test/browser/application_octet_stream.js",
     "compile:application_x_ndjson": "browserify ./lib/parsers/application_x_ndjson.js --standalone application_x_ndjson -o ./test/browser/application_x_ndjson.js",
-    "compile.broken:application_xml": "browserify ./lib/parsers/application_xml.js --standalone application_xml -o ./test/browser/application_xml.js",
+    "compile:application_xml": "browserify ./lib/parsers/application_xml.js --standalone application_xml -o ./test/browser/application_xml.js",
     "compile:text_csv": "browserify ./lib/parsers/text_csv.js --standalone text_csv -o ./test/browser/text_csv.js",
     "compile:text_n3": "browserify ./lib/parsers/text_n3.js --standalone text_n3 -o ./test/browser/text_n3.js",
     "compile:text_tab_separated_values": "browserify ./lib/parsers/text_tab_separated_values.js --standalone text_tab_separated_values -o ./test/browser/text_tab_separated_values.js",
