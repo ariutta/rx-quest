@@ -6,7 +6,8 @@
   "scripts": {
     "build": "npm run compile && npm run compress",
     "compile": "npm-run-all compile:*",
-    "compile:main": "node ./build/mask-maker.js && browserify index.js --debug -o ./test/browser/superagent-get-chunked.js && echo 'onmessage = function(e) {' > ./test/browser/superagent-get-chunked-worker.js && browserify ./lib/superagent-worker-body.js >> ./test/browser/superagent-get-chunked-worker.js && echo '};' >> ./test/browser/superagent-get-chunked-worker.js && cp ./test/browser/superagent-get-chunked-worker.js ./test/browser/superagent-get-chunked-worker.min.js && node ./build/mask-maker-test.js",
+    "compile1:main": "node ./build/mask-maker.js && browserify index.js --debug -o ./test/browser/superagent-get-chunked.js && echo 'onmessage = function(e) {' > ./test/browser/superagent-get-chunked-worker.js && browserify ./lib/superagent-worker-body.js >> ./test/browser/superagent-get-chunked-worker.js && echo '};' >> ./test/browser/superagent-get-chunked-worker.js && cp ./test/browser/superagent-get-chunked-worker.js ./test/browser/superagent-get-chunked-worker.min.js && node ./build/mask-maker-test.js",
+    "compile:main": "node ./build/mask-maker.js && browserify index.js --debug -o ./test/browser/superagent-get-chunked.js && node ./build/mask-maker-test.js",
     "compile:c3": "browserify ./test/browser/c3.js --standalone c3 -o ./test/browser/c3.bundle.js",
     "compile:application_json": "browserify ./lib/parsers/application_json.js --standalone application_json -o ./test/browser/application_json.js",
     "compile:application_octet_stream": "browserify ./lib/parsers/application_octet_stream.js --standalone application_octet_stream -o ./test/browser/application_octet_stream.js",
@@ -18,7 +19,7 @@
     "compress": "uglifyjs ./test/browser/superagent-get-chunked-worker.js -c --debug -o ./test/browser/superagent-get-chunked-worker.min.js",
     "size": "browserify -g uglifyify ./size.js --standalone size | uglifyjs -c -o ./size.bundle.js && ls -lh | grep 'size.bundle.js' && rm ./size.bundle.js",
     "start": "echo 'Once build finishes, visit http://localhost:8080' && npm run build && cd ./test/browser && http-server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --harmony --full-trace --check-leaks --timeout=6000 ./test/integration.js"
   },
   "repository": {
     "type": "git",
@@ -49,18 +50,41 @@
     "npm": "^3.10.5",
     "npm-run-all": "^2.3.0",
     "requests": "ariutta/requests#49d2a241e316ac28f30dc57c73d1f96b3a7cfcef",
-    "rx-extra": "^1.0.2",
     "sax": "^1.2.1",
     "superagent": "^2.1.0",
     "ys-hash": "^0.1.2"
   },
   "devDependencies": {
+    "@conglomerate/worker": "^1.2.0",
     "assert": "^1.4.1",
+    "blessed": "^0.1.81",
     "browserify": "^13.0.1",
     "c3": "^0.4.11",
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.3.0",
     "component-emitter": "^1.2.1",
+    "freeport": "^1.0.5",
+    "http": "0.0.0",
     "http-server": "^0.9.0",
+    "karma": "^1.1.2",
+    "karma-browserify": "^5.1.0",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^1.0.1",
+    "karma-coverage": "^1.1.1",
+    "karma-firefox-launcher": "^1.0.0",
+    "karma-growl-reporter": "^1.0.0",
+    "karma-mocha": "^1.1.1",
+    "karma-mocha-reporter": "^2.1.0",
+    "lodash": "^4.14.2",
+    "mocha": "^3.0.2",
+    "mockserver": "^1.5.1",
+    "npm-run-all": "^2.3.0",
+    "rx-extra": "^1.0.2",
+    "rx-fs": "^1.0.0-alpha.2",
+    "sinon": "^1.17.5",
     "uglify-js": "^2.7.0",
-    "uglifyify": "^3.0.2"
+    "uglifyify": "^3.0.2",
+    "watchify": "^3.7.0",
+    "wd": "^0.4.0"
   }
 }
