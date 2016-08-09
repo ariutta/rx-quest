@@ -50,6 +50,7 @@
     "npm": "^3.10.5",
     "npm-run-all": "^2.3.0",
     "requests": "ariutta/requests#49d2a241e316ac28f30dc57c73d1f96b3a7cfcef",
+    "resolve-url": "^0.2.1",
     "sax": "^1.2.1",
     "superagent": "^2.1.0",
     "ys-hash": "^0.1.2"
