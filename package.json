@@ -6,8 +6,8 @@
   "scripts": {
     "build": "npm run compile && npm run compress",
     "compile": "npm-run-all compile:*",
-    "compile1:main": "node ./build/mask-maker.js && browserify index.js --debug -o ./test/browser/superagent-get-chunked.js && echo 'onmessage = function(e) {' > ./test/browser/superagent-get-chunked-worker.js && browserify ./lib/superagent-worker-body.js >> ./test/browser/superagent-get-chunked-worker.js && echo '};' >> ./test/browser/superagent-get-chunked-worker.js && cp ./test/browser/superagent-get-chunked-worker.js ./test/browser/superagent-get-chunked-worker.min.js && node ./build/mask-maker-test.js",
-    "compile:main": "node ./build/mask-maker.js && browserify index.js --debug -o ./test/browser/superagent-get-chunked.js && node ./build/mask-maker-test.js",
+    "compile.oldworkerversion:main": "node ./build/mask-maker.js && browserify index.js --debug -o ./test/browser/superagent-get-chunked.js && echo 'onmessage = function(e) {' > ./test/browser/superagent-get-chunked-worker.js && browserify ./lib/superagent-worker-body.js >> ./test/browser/superagent-get-chunked-worker.js && echo '};' >> ./test/browser/superagent-get-chunked-worker.js && cp ./test/browser/superagent-get-chunked-worker.js ./test/browser/superagent-get-chunked-worker.min.js && node ./build/mask-maker-test.js",
+    "compile:main": "node ./build/mask-maker.js && browserify index.js --standalone requests --debug -o ./test/browser/superagent-get-chunked.js && node ./build/mask-maker-test.js",
     "compile:c3": "browserify ./test/browser/c3.js --standalone c3 -o ./test/browser/c3.bundle.js",
     "compile:application_json": "browserify ./lib/parsers/application_json.js --standalone application_json -o ./test/browser/application_json.js",
     "compile:application_octet_stream": "browserify ./lib/parsers/application_octet_stream.js --standalone application_octet_stream -o ./test/browser/application_octet_stream.js",
@@ -19,7 +19,8 @@
     "compress": "uglifyjs ./test/browser/superagent-get-chunked-worker.js -c --debug -o ./test/browser/superagent-get-chunked-worker.min.js",
     "size": "browserify -g uglifyify ./size.js --standalone size | uglifyjs -c -o ./size.bundle.js && ls -lh | grep 'size.bundle.js' && rm ./size.bundle.js",
     "start": "echo 'Once build finishes, visit http://localhost:8080' && npm run build && cd ./test/browser && http-server",
-    "test": "mocha --harmony --full-trace --check-leaks --timeout=6000 ./test/integration.js"
+    "test": "echo 'Test manually: npm start and then go to both http://localhost:8080 and localhost:8080/lower and click each button to make sure everything works.'",
+    "test.neverworked": "node ./build/mask-maker.js && mocha --harmony --full-trace --check-leaks --timeout=6000 ./test/integration.js && node ./build/mask-maker-test.js"
   },
   "repository": {
     "type": "git",
@@ -80,12 +81,15 @@
     "mocha": "^3.0.2",
     "mockserver": "^1.5.1",
     "npm-run-all": "^2.3.0",
+    "pretty-data": "^0.40.0",
     "rx-extra": "^1.0.2",
     "rx-fs": "^1.0.0-alpha.2",
     "sinon": "^1.17.5",
+    "tower-strcase": "^0.5.0",
     "uglify-js": "^2.7.0",
     "uglifyify": "^3.0.2",
     "watchify": "^3.7.0",
-    "wd": "^0.4.0"
+    "wd": "^0.4.0",
+    "yargs": "^4.8.1"
   }
 }
