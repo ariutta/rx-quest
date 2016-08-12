@@ -16,7 +16,7 @@
     "compile:text_csv": "browserify ./lib/parsers/text_csv.js --standalone text_csv -o ./test/browser/text_csv.js",
     "compile:text_n3": "browserify ./lib/parsers/text_n3.js --standalone text_n3 -o ./test/browser/text_n3.js",
     "compile:text_tab_separated_values": "browserify ./lib/parsers/text_tab_separated_values.js --standalone text_tab_separated_values -o ./test/browser/text_tab_separated_values.js",
-    "compress": "uglifyjs ./test/browser/superagent-get-chunked-worker.js -c --debug -o ./test/browser/superagent-get-chunked-worker.min.js",
+    "compress": "uglifyjs ./test/browser/superagent-get-chunked.js -c --debug -o ./test/browser/superagent-get-chunked.min.js",
     "size": "browserify -g uglifyify ./size.js --standalone size | uglifyjs -c -o ./size.bundle.js && ls -lh | grep 'size.bundle.js' && rm ./size.bundle.js",
     "start": "echo 'Once build finishes, visit http://localhost:8080' && npm run build && cd ./test/browser && http-server",
     "test": "echo 'Test manually: npm start and then go to both http://localhost:8080 and localhost:8080/lower and click each button to make sure everything works.'",
@@ -40,7 +40,6 @@
     "JSONStream": "^1.1.3",
     "base58": "^0.1.0",
     "bitmask": "young-steveo/bitmask.js#345d7088bc2f52a87a0e02c2a89b5f40f03c1d9d",
-    "component-emitter": "^1.2.1",
     "event-emitter": "^0.3.4",
     "eventemitter3": "^1.2.0",
     "install": "^0.8.1",
@@ -53,8 +52,7 @@
     "requests": "ariutta/requests#49d2a241e316ac28f30dc57c73d1f96b3a7cfcef",
     "resolve-url": "^0.2.1",
     "sax": "^1.2.1",
-    "superagent": "^2.1.0",
-    "ys-hash": "^0.1.2"
+    "superagent": "^2.1.0"
   },
   "devDependencies": {
     "@conglomerate/worker": "^1.2.0",

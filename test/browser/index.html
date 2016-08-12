@@ -10,14 +10,15 @@
   <body>
     <div id="content">
       <div id="button-container"></div>
-      <p>Watch the data load incrementally.</p>
       <p>Status: <span id="display-status">waiting</span></p>
       <p id="display-progress">Progress: </p>
-      <p>The celestial bodies should keep moving smoothly, even during loading and parsing of data:</p>
-      <p>The final parsed response chunk will be shown below (truncated, if needed, to limit to 10k characters).</p>
-      <div id="final-chunk"></div>
-      <!-- Learn about this code on MDN: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Basic_animations -->
-      <canvas id="canvas" width="300" height="300"></canvas>
+      <p>The first five parsed response chunks:</p>
+      <div id="sample-chunks"></div>
+      <div id="animation">
+        <p>The data should load and be parsed incrementally, and the animation should keep moving smoothly the whole time:</p>
+        <!-- Learn about this code on MDN: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Basic_animations -->
+        <canvas id="canvas" width="300" height="300"></canvas>
+      </div>
       <div id="chart"></div>
     </div>
 

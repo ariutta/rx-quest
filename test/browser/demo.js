@@ -2,11 +2,15 @@ function executeRequest(selectedInput) {
   var status = 'loading';
   var totalLoaded = 0
 
-  var canvasEl = document.querySelector('#canvas');
-  canvasEl.style.display = '';
+  var chartEl = document.querySelector('#chart');
+  chartEl.style.display = 'none';
 
-  var finalChunkEl = document.querySelector('#final-chunk');
-  finalChunkEl.textContent = '';
+  var animationEl = document.querySelector('#animation');
+  animationEl.style.display = '';
+
+  var sampleChunksEl = document.querySelector('#sample-chunks');
+  sampleChunksEl.textContent = '';
+  var sampleChunkCount = 0;
 
   var statusP = document.querySelector('#display-status');
   statusP.textContent = status;
@@ -14,7 +18,6 @@ function executeRequest(selectedInput) {
   var progressP = document.querySelector('#display-progress');
   progressP.textContent = 'Progress: ';
 
-  var finalChunkAsString = '';
   var chunkStringLengthsColumn = ['Chunk Number'];
   var dataEventCount = 0;
   window.requests(selectedInput.url, {
@@ -33,10 +36,17 @@ function executeRequest(selectedInput) {
   .on('data', function(chunk) {
     dataEventCount += 1;
     var chunkAsString = JSON.stringify(chunk);
-    if (chunk !== '') {
-      finalChunkAsString = chunkAsString;
-    }
     var chunkAsStringLength = chunkAsString.length;
+    sampleChunkCount += 1;
+    if (chunkAsStringLength > 0 && sampleChunkCount < 6) {
+      var sampleChunkHeaderEl = document.createElement('p');
+      sampleChunkHeaderEl.textContent = 'Sample Chunk #' + String(sampleChunkCount);
+      sampleChunksEl.appendChild(sampleChunkHeaderEl);
+
+      var sampleChunkValueEl = document.createElement('p');
+      sampleChunkValueEl.textContent = chunkAsString;
+      sampleChunksEl.appendChild(sampleChunkValueEl);
+    }
     totalLoaded += chunkAsStringLength;
     chunkStringLengthsColumn.push(chunkAsStringLength)
     window.requestAnimationFrame(function() {
@@ -59,8 +69,9 @@ function executeRequest(selectedInput) {
   .on('end', function() {
     status = 'complete';
     statusP.textContent = status;
-    canvasEl.style.display = 'none';
+    animationEl.style.display = 'none';
     if (chartEnabled) {
+      chartEl.style.display = '';
       var chart = window.c3.generate({
         bindto: '#chart',
         data: {
@@ -71,19 +82,13 @@ function executeRequest(selectedInput) {
         axis: {
           y: {
             label: {
-              text: 'Chunk Size',
+              text: 'Chunk Character Count',
               position: 'outer-middle'
             }
           }
         }
       });
     }
-    if (!finalChunkAsString || finalChunkAsString === '') {
-      finalChunkAsString = 'no final chunk';
-    } else {
-      finalChunkAsString = finalChunkAsString.slice(0, 10 * 1000);
-    }
-    finalChunkEl.textContent = finalChunkAsString;
   });
 }
 
@@ -131,6 +136,9 @@ var inputs = [{
   accept: 'json',
   url: 'https://publicdata-weather.firebaseio.com/sanfrancisco/.json',
   fontSize: '8px',
+  parser: {
+    options: ['*.data'],
+  },
 }, {
   accept: 'ndjson',
   url: 'https://cdn.rawgit.com/maxogden/sqlite-search/master/test.ndjson',
@@ -181,4 +189,4 @@ inputs.forEach(function(input, index) {
 
 var chartEnabled = true;
 
-executeRequest(inputs[0]);
+executeRequest(inputs[4]);
