@@ -111,8 +111,7 @@ var inputs = [{
   // large file!
   accept: 'tsv',
   url: [
-    'https://cdn.rawgit.com/nrnb/mirna-pathway-finder/master/',
-    'wp-mir-table-builder/mir-gene-targets.txt'
+    'https://cdn.rawgit.com/nrnb/mirna-pathway-finder/master/wp-mir-table-builder/mir-gene-targets.txt'
   ].join(''),
   fontSize: '5px',
   parser: {

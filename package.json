@@ -1,13 +1,13 @@
 {
-  "name": "superagent-get-chunked",
+  "name": "superagent-chunked",
   "version": "1.0.0-alpha.0",
   "description": "Adds support to the superagent library for chunked-transfer encoded responses when in the browser.",
   "main": "index.js",
   "scripts": {
     "build": "npm run compile && npm run compress",
     "compile": "npm-run-all compile:*",
-    "compile.oldworkerversion:main": "node ./build/mask-maker.js && browserify index.js --debug -o ./test/browser/superagent-get-chunked.js && echo 'onmessage = function(e) {' > ./test/browser/superagent-get-chunked-worker.js && browserify ./lib/superagent-worker-body.js >> ./test/browser/superagent-get-chunked-worker.js && echo '};' >> ./test/browser/superagent-get-chunked-worker.js && cp ./test/browser/superagent-get-chunked-worker.js ./test/browser/superagent-get-chunked-worker.min.js && node ./build/mask-maker-test.js",
-    "compile:main": "node ./build/mask-maker.js && browserify index.js --standalone requests --debug -o ./test/browser/superagent-get-chunked.js && node ./build/mask-maker-test.js",
+    "compile.oldworkerversion:main": "node ./build/mask-maker.js && browserify index.js --debug -o ./test/browser/superagent-chunked.js && echo 'onmessage = function(e) {' > ./test/browser/superagent-chunked-worker.js && browserify ./lib/superagent-worker-body.js >> ./test/browser/superagent-chunked-worker.js && echo '};' >> ./test/browser/superagent-chunked-worker.js && cp ./test/browser/superagent-chunked-worker.js ./test/browser/superagent-chunked-worker.min.js && node ./build/mask-maker-test.js",
+    "compile:main": "node ./build/mask-maker.js && browserify index.js --standalone requests --debug -o ./test/browser/superagent-chunked.js && node ./build/mask-maker-test.js",
     "compile:c3": "browserify ./test/browser/c3.js --standalone c3 -o ./test/browser/c3.bundle.js",
     "compile:application_json": "browserify ./lib/parsers/application_json.js --standalone application_json -o ./test/browser/application_json.js",
     "compile:application_octet_stream": "browserify ./lib/parsers/application_octet_stream.js --standalone application_octet_stream -o ./test/browser/application_octet_stream.js",
@@ -16,7 +16,7 @@
     "compile:text_csv": "browserify ./lib/parsers/text_csv.js --standalone text_csv -o ./test/browser/text_csv.js",
     "compile:text_n3": "browserify ./lib/parsers/text_n3.js --standalone text_n3 -o ./test/browser/text_n3.js",
     "compile:text_tab_separated_values": "browserify ./lib/parsers/text_tab_separated_values.js --standalone text_tab_separated_values -o ./test/browser/text_tab_separated_values.js",
-    "compress": "uglifyjs ./test/browser/superagent-get-chunked.js -c --debug -o ./test/browser/superagent-get-chunked.min.js",
+    "compress": "uglifyjs ./test/browser/superagent-chunked.js -c --debug -o ./test/browser/superagent-chunked.min.js",
     "size": "browserify -g uglifyify ./size.js --standalone size | uglifyjs -c -o ./size.bundle.js && ls -lh | grep 'size.bundle.js' && rm ./size.bundle.js",
     "start": "echo 'Once build finishes, visit http://localhost:8080' && npm run build && cd ./test/browser && http-server",
     "test": "echo 'Test manually: npm start and then go to both http://localhost:8080 and localhost:8080/lower and click each button to make sure everything works.'",
@@ -24,7 +24,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/ariutta/superagent-get-chunked.git"
+    "url": "git+ssh://git@github.com/ariutta/superagent-chunked.git"
   },
   "keywords": [
     "request",
@@ -33,9 +33,9 @@
   "author": "Anders Riutta",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ariutta/superagent-get-chunked/issues"
+    "url": "https://github.com/ariutta/superagent-chunked/issues"
   },
-  "homepage": "https://github.com/ariutta/superagent-get-chunked#readme",
+  "homepage": "https://github.com/ariutta/superagent-chunked#readme",
   "dependencies": {
     "JSONStream": "^1.1.3",
     "base58": "^0.1.0",
